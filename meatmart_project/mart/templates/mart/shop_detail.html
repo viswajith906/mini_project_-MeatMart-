@@ -1,0 +1,148 @@
+{% extends 'mart/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="row g-0">
+            <div class="col-md-5">
+                {% if shop.product_image %}
+                <img src="{{ shop.product_image.url }}" class="img-fluid rounded-start" alt="{{ shop.product_name }}">
+                {% else %}
+                <img src="https://via.placeholder.com/400x300?text=No+Image" class="img-fluid rounded-start">
+                {% endif %}
+                <!-- Important box moved here (fills left column under image) -->
+                <div class="important-wrapper">
+                    <div class="important-title">....IMPORTANT....</div>
+                    <div class="important-note">
+                        <ol><b>
+                            <li>Verify your needs before placing order.</li>
+                            <li>If you don't need ordered product, cancel the order within 10 minutes, otherwise it will be placed.</li>
+                            <li>If delivery distance is more than 1 km, extra ₹10 added to the order for each kilometre.</li>
+                            <li>Need any help? Contact shop or call helpline number (011-12345678).</li></b>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+           
+            <div class="col-md-7">
+                <div class="card-body">
+                    <h3 class="card-title">{{ shop.product_name }}</h3>
+                    <p class="card-text">{{ shop.description|default:"No description available" }}</p>
+                
+              
+
+
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item"><b>Shop Name:</b> {{ shop.name }}</li>
+                        <li class="list-group-item"><b>Phone Number:</b> {{ shop.phone_number|default:"Not provided" }}</li>
+                        <li class="list-group-item"><b>Payment Phone:</b>{{ shop.payment_phone_number|default:"Not provided" }}</li>
+                        <li class="list-group-item"><b>Location:</b> {{ shop.location }}</li>
+                        <li class="list-group-item"><b>Available Quantity:</b> {{ shop.quantity }} Kg</li>
+                        <li class="list-group-item"><b>Rate:</b> ₹{{ shop.rate }} / Kg</li>
+                    </ul>
+
+                    <form method="POST" action="{% url 'place_order' shop.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Select Quantity (Kg):</label>
+                            <input type="number" id="quantity" name="quantity" class="form-control"
+                                   min="1" max="{{ shop.quantity }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Order</button>
+                        {# show cancel only when order was just created and order_id present in querystring #}
+                        {% if request.GET.order_id %}
+                        <a href="{% url 'cancel_order' request.GET.order_id %}" class="btn btn-danger ms-2"
+                        onclick="return confirm('Are you sure you want to cancel this order?');">
+                        Cancel Order
+                        </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+<!-- Customer Reviews (replace your existing block with this) -->
+<div class="mt-4" id="reviewsSection">
+  <h4>Customer Reviews {% if feedback_count %} ({{ feedback_count }}) {% endif %}</h4>
+
+  {% if not feedbacks %}
+    <p>No reviews yet. Be the first to review this shop!</p>
+  {% else %}
+    {# show only the first/latest review #}
+    {% with first=feedbacks.0 %}
+      <div class="border p-3 mb-2 rounded">
+        <div class="d-flex justify-content-between align-items-start">
+          <div><strong>{{ first.customer.username }}</strong></div>
+          <div><strong>{{ first.rating }} ★</strong></div>
+        </div>
+        {% if first.comment %}
+          <div class="mt-2">{{ first.comment|linebreaksbr }}</div>
+        {% endif %}
+        <div class="text-muted small mt-1">Order #{{ first.order.id }}, {{ first.created_at|date:"d M Y" }}</div>
+      </div>
+    {% endwith %}
+
+    {# if more reviews exist, show button that toggles collapse containing the rest #}
+    {% if feedbacks|length > 1 %}
+      <div class="mb-2">
+        <button class="btn btn-sm btn-outline-primary" type="button"
+                data-bs-toggle="collapse" data-bs-target="#moreReviews"
+                aria-expanded="false" aria-controls="moreReviews"
+                id="toggleReviewsBtn">
+          Show {{ feedbacks|length|add:"-1" }} more review{% if feedbacks|length|add:"-1" != 1 %}s{% endif %} ▼
+        </button>
+      </div>
+
+      <div class="collapse" id="moreReviews">
+        <div class="card card-body">
+          {% for fb in feedbacks|slice:"1:" %}
+            <div class="border-bottom pb-2 mb-2">
+              <div class="d-flex justify-content-between">
+                <div><strong>{{ fb.customer.username }}</strong></div>
+                <div>{{ fb.rating }} ★</div>
+              </div>
+              {% if fb.comment %}
+                <div class="mt-2">{{ fb.comment|linebreaksbr }}</div>
+              {% endif %}
+              <div class="text-muted small mt-1">Order #{{ fb.order.id }}, {{ fb.created_at|date:"d M Y" }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('toggleReviewsBtn');
+  const collapseEl = document.getElementById('moreReviews');
+
+  if (!btn || !collapseEl) return;
+
+  // server-rendered number of remaining reviews (1 less than total)
+  const remaining = "{{ feedbacks|length|add:'-1' }}";
+  const showText = `Show ${remaining} more review${remaining !== '1' ? 's' : ''} ▼`;
+  const hideText = 'Hide reviews ▲';
+
+  // make sure the button text matches JS (useful if templates differ)
+  btn.textContent = showText;
+
+  // Bootstrap emits shown.bs.collapse / hidden.bs.collapse events
+  collapseEl.addEventListener('shown.bs.collapse', function () {
+    // smooth-scroll the revealed block into view
+    collapseEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    btn.textContent = hideText;
+  });
+
+  collapseEl.addEventListener('hidden.bs.collapse', function () {
+    btn.textContent = showText;
+  });
+});
+</script>
+
+
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+ 

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meat Mart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: #8B0000;
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .btn-primary {
+            background-color: #8B0000;
+            border-color: #8B0000;
+        }
+        .btn-primary:hover {
+            background-color: #A52A2A;
+            border-color: #A52A2A;
+        }
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://media.istockphoto.com/id/157604381/photo/assorted-raw-meat.jpg?s=612x612&w=0&k=20&c=bvI-jtOc0C9AstDXVU5MD9JGjpDUJh618k7LBjP5vlM=');
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .dropdown-menu {
+            background-color: #000000ff;
+        }
+        .dropdown-item {
+            color: white;
+        }
+        .dropdown-item:hover {
+            background-color: #A52A2A;
+            color: white;
+        }
+         /* ✅ Sticky footer fix */
+    html, body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    main {
+        flex: 1;
+    }
+    
+
+/* make the columns stretch to equal height */
+.card .row.g-0 {
+  align-items: stretch;
+}
+
+/* left column: stack image then important box, allow box to grow */
+.left-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* product image sizing so it doesn't overflow the box */
+.product-image {
+  width: 100%;
+  max-height: 260px;      /* adjust height to taste */
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* important box should grow to fill remaining left-column space */
+.important-wrapper {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: #fff8f0;
+  border-left: 4px solid #ff6b00;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  flex: 1 1 auto;         /* allow to grow */
+  overflow: auto;
+  min-height: 160px;      /* ensures visible area — tweak as needed */
+}
+
+/* same clamp styling you had for the note */
+.important-title {
+  font-weight: 700;
+  color: #8B0000;
+  margin-bottom: 6px;
+}
+.important-note {
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3rem;
+}
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-store"></i> Meat Mart
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if request.session.user_id %}
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                Welcome, {{ request.session.user_role }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-light" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-light me-2" href="{% url 'register' %}">Register</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle btn btn-outline-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                Login
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'customer_login' %}">Customer Login</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop_login' %}">Shop Login</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container mt-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    {% if request.session.user_role == 'shop' %}
+<!-- toast container -->
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index:1055;">
+  <div id="orderToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">New Order</strong>
+      <small class="text-muted" id="toastTime"></small>
+      <button type="button" class="btn-close ms-2 mb-1" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toastBody">
+      You have new orders.
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p>&copy; 2023 Meat Mart. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% if request.session.user_role == 'shop' %}
+<script>
+(function(){
+  // Polling interval (ms)
+  const POLL_INTERVAL_MS = 10000; // 10 seconds
+
+  // Play a short beep using WebAudio API (no external file)
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880; // Hz
+      g.gain.value = 0.05;     // volume (small)
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(0);
+      // ramp down quickly
+      setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06); o.stop(ctx.currentTime + 0.07); ctx.close(); }, 80);
+    } catch (e) {
+      console.warn('beep failed', e);
+    }
+  }
+
+  // Show bootstrap toast (expects bootstrap bundle loaded)
+  function showOrderToast(count, orders) {
+    const toastEl = document.getElementById('orderToast');
+    const toastBody = document.getElementById('toastBody');
+    const toastTime = document.getElementById('toastTime');
+
+    toastTime.textContent = new Date().toLocaleTimeString();
+    let html = `<div><strong>${count}</strong> new order${count > 1 ? 's' : ''} received.</div>`;
+    if (orders && orders.length) {
+      html += '<ul class="mb-0 mt-2 small">';
+      orders.slice(0,3).forEach(o => {
+        html += `<li>Order #${o.id} — ${o.customer} — ${o.quantity} Kg — ₹${o.total_price}</li>`;
+      });
+      html += '</ul>';
+      html += '<div class="mt-2"><a href="{% url "shop_notifications" %}" class="btn btn-sm btn-primary">View all</a></div>';
+    }
+    toastBody.innerHTML = html;
+
+    const bsToast = new bootstrap.Toast(toastEl, { delay: 8000 });
+    bsToast.show();
+  }
+
+  // Poll the server
+  async function pollUnread() {
+    try {
+      const resp = await fetch("{% url 'api_shop_unread_orders' %}", { credentials: 'same-origin' });
+      if (!resp.ok) {
+        // ignore 403 (e.g., not logged in as shop)
+        return;
+      }
+      const data = await resp.json();
+      if (data && data.unread_count && data.unread_count > 0) {
+        // play beep, show toast
+        playBeep();
+        showOrderToast(data.unread_count, data.orders || []);
+        // optionally also update a visible badge in the nav (if you have one)
+        updateNavBadge(data.unread_count);
+      }
+    } catch (err) {
+      console.error('poll unread error', err);
+    } finally {
+      // schedule next poll
+      setTimeout(pollUnread, POLL_INTERVAL_MS);
+    }
+  }
+
+  function updateNavBadge(count) {
+    // if you have a badge element in nav like <span id="notifBadge">...</span>
+    const el = document.getElementById('notifBadge');
+    if (!el) return;
+    el.textContent = count > 0 ? count : '';
+    el.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+
+  // start polling after DOM ready
+  document.addEventListener('DOMContentLoaded', function() {
+    pollUnread();
+  });
+})();
+</script>
+{% endif %}
+
+{% load static %}
+
+<!-- 🔔 Audio for notification -->
+<audio id="notif-sound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
+
+<!-- Enable-sound banner (hidden until needed) -->
+<div id="enable-sound-banner" style="position:fixed; bottom:20px; right:20px; z-index:2100; display:none;">
+  <button id="enableSoundBtn" class="btn btn-sm btn-primary">Enable notification sound</button>
+</div>
+
+<!-- Place where toast will appear -->
+<div id="toastBox" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
+
+<script>
+  
+document.addEventListener('DOMContentLoaded', function () {
+  // --- Fix for browsers that suspend AudioContext until user interacts ---
+document.addEventListener('click', async function resumeAudio() {
+  try {
+    if (window.audioContext && window.audioContext.state === 'suspended') {
+      await window.audioContext.resume();
+      console.log('AudioContext resumed on user click');
+    }
+  } catch (e) {
+    console.warn('AudioContext resume failed:', e);
+  }
+  // remove listener after first resume
+  document.removeEventListener('click', resumeAudio);
+});
+
+  const sound = document.getElementById('notif-sound');
+  const toastBox = document.getElementById('toastBox');
+  const enableBanner = document.getElementById('enable-sound-banner');
+  const enableBtn = document.getElementById('enableSoundBtn');
+
+  // state
+  let lastCount = null;         // null means "not initialized yet"
+  let initialized = false;
+  let soundEnabled = false;
+  window.audioContext = null;
+  let audioBuffer = null;
+
+  // --- Toast helper (keeps your look & feel) ---
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.innerHTML = message;
+    toast.style.background = '#28a745';
+    toast.style.color = 'white';
+    toast.style.padding = '10px 15px';
+    toast.style.marginTop = '10px';
+    toast.style.borderRadius = '5px';
+    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    toastBox.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+  }
+
+  // --- Initialize AudioContext and decode file (called after a user gesture) ---
+  async function initAudioContextAndBuffer() {
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      // fetch the audio file and decode
+      const resp = await fetch(sound.src);
+      const arrayBuffer = await resp.arrayBuffer();
+      audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      console.log('AudioContext and buffer ready');
+    } catch (e) {
+      console.warn('Failed to init AudioContext:', e);
+      audioContext = null;
+      audioBuffer = null;
+    }
+  }
+
+  // --- Play using AudioContext buffer if available, otherwise fallback to audio element ---
+  function playNotificationSound() {
+    if (audioContext && audioBuffer) {
+      try {
+        const src = audioContext.createBufferSource();
+        src.buffer = audioBuffer;
+        src.connect(audioContext.destination);
+        src.start(0);
+      } catch (e) {
+        console.warn('AudioContext play failed; falling back to audio element', e);
+        sound.play().catch(e2 => console.warn('Fallback play failed', e2));
+      }
+    } else {
+      // fallback to audio element (returns a promise)
+      sound.play().catch(err => {
+        console.warn('audio.play() rejected:', err);
+        // If playback rejected, show enable banner to instruct user to enable sound
+        enableBanner.style.display = 'block';
+      });
+    }
+  }
+
+  // --- "Enable Sound" button click handler (user gesture unlocks playback) ---
+  enableBtn.addEventListener('click', async () => {
+    try {
+      // Try audio element play first — many browsers unlock with a click that plays audio
+      await sound.play();
+      sound.pause();
+      sound.currentTime = 0;
+      soundEnabled = true;
+      enableBanner.style.display = 'none';
+      // Also initialize AudioContext for better control
+      await initAudioContextAndBuffer();
+      console.log('Notification sound enabled by user');
+    } catch (err) {
+      console.warn('audio.play() blocked on click, trying AudioContext resume/init', err);
+      // Try to create/resume AudioContext as second attempt
+      try {
+        if (!window.audioContext || window.audioContext.state === 'closed') {
+          await initAudioContextAndBuffer();
+        }
+        if (window.audioContext.state === 'suspended') {
+          await window.audioContext.resume();
+        }
+
+        if (audioContext) {
+          await audioContext.resume();
+          soundEnabled = true;
+          enableBanner.style.display = 'none';
+          console.log('AudioContext resumed and sound enabled');
+        } else {
+          alert('Could not enable sound — your browser may restrict audio. Try interacting with the page and click again.');
+        }
+      } catch (e) {
+        console.error('Failed enabling sound', e);
+        alert('Could not enable sound. Check browser autoplay settings or try a different browser.');
+      }
+    }
+  });
+
+  // --- Polling for unread orders with safe initialization ---
+  async function checkOrders() {
+    try {
+      const response = await fetch("{% url 'api_shop_unread_orders' %}");
+      const data = await response.json();
+
+      if (!initialized) {
+        // On first run, set lastCount but DO NOT play sound
+        lastCount = data.unread_count;
+        initialized = true;
+        return;
+      }
+
+      if (data.unread_count > lastCount) {
+        // new orders arrived
+        showToast(`You have ${data.unread_count} new order(s)!`);
+        if (soundEnabled) {
+          playNotificationSound();
+        } else {
+          // prompt user to enable sound (diplomatic)
+          enableBanner.style.display = 'block';
+        }
+      }
+      // always update lastCount
+      lastCount = data.unread_count;
+    } catch (error) {
+      console.error("Error checking orders:", error);
+    }
+  }
+
+  // run once immediately (initializes lastCount without playing) then poll
+  checkOrders();
+  setInterval(checkOrders, 10000);
+});
+
+document.getElementById('notificationsBtn')?.addEventListener('click', async function(e){
+  try {
+    await fetch("{% url 'api_mark_orders_seen' %}", { method: 'POST', headers: {'X-CSRFToken': getCookie('csrftoken')} });
+    // Optionally hide badge immediately:
+    const badge = document.querySelector('#notifBadge');
+    if (badge) badge.style.display = 'none';
+  } catch (err) {
+    console.error('Could not mark notifications seen', err);
+  }
+});
+
+</script>
+
+
+</body>
+</html>

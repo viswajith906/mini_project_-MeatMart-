@@ -1,0 +1,118 @@
+{% extends 'mart/base.html' %}
+
+{% block content %}
+
+{% if request.session.user_role == 'shop' %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{% url 'shop_delivery' %}" class="btn btn-outline-success me-2">
+    <i class="fas fa-truck me-1"></i> Delivery
+  </a>
+  <a id="notificationsBtn" href="{% url 'shop_notifications' %}" class="btn btn-outline-warning me-2">
+
+    <i class="fas fa-bell me-1"></i> Notifications
+    <!-- 🔴 badge placeholder -->
+  <span id="notifBadge"
+        class="badge bg-danger ms-1"
+        style="display:none; font-size:0.8rem;">0</span>
+  </a>
+
+  <!-- New Feedback button -->
+  <a href="{% url 'shop_feedbacks' %}" class="btn btn-outline-info">
+    <i class="fas fa-star me-1"></i>Reviews&Suggestion
+  </a>
+</div>
+
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Shop Registration Form</h3>
+            </div>
+            <!-- Common Important Instruction Box -->
+<div class="important-wrapper my-3">
+  <div class="important-title"><u>     READ CAREFULLY BEFORE REGISTRATION   </u></div>
+  <div class="important-note">
+    <ol><b>
+      <h7>
+      <li>Registration entry only for door-delivery shops – make sure before registering.</li>
+      <li>Fullfill all required data in the form and recheck it before saving.</li>
+      <li>Keep shop and products hygienic.</li>
+      <li>Update daily product price and quantity then save.</li>
+      <li>If delivery distance is more than 1 km, add order + extra ₹10 for each kilometre.</li></h7>
+    </b></ol>
+  </div>
+</div>
+
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4 class="mb-3">Shop Information</h4>
+                            <div class="mb-3">
+                                <label class="form-label">Shop Image</label>
+                                <input type="file" class="form-control" name="shop_image">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Shop Name</label>
+                                <input type="text" class="form-control" name="name" value="{{ form.instance.name|default:'' }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" name="address" rows="1" required>{{ form.instance.address|default:'' }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Location</label>
+                                <textarea class="form-control" name="location" rows="1" required>{{ form.instance.location|default:'' }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" name="phone_number" value="{{ form.instance.phone_number|default:'' }}" required>
+                            </div>
+                            <div class="mb-3">
+                            <label for="payment_phone_number" class="form-label">Online Payment Phone</label>
+                            <input type="text" class="form-control" name="payment_phone_number" value="{{ form.instance.payment_phone_number|default:'' }}" required>
+        
+                            <div class="form-text">*Phone number for payment (Don't Skip).</div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-6">
+                            <h4 class="mb-3">Product Information</h4>
+                            <div class="mb-3">
+                                <label class="form-label">Product Image</label>
+                                <input type="file" class="form-control" name="product_image">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Product Name</label>
+                                <input type="text" class="form-control" name="product_name" value="{{ form.instance.product_name|default:'' }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quantity (Kg)</label>
+                                <input type="number" class="form-control" name="quantity" value="{{ form.instance.quantity|default:'0' }}" required min="0">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Rate (Price)</label>
+                                <input type="number" step="0.01" class="form-control" name="rate" value="{{ form.instance.rate|default:'0' }}" required min="0">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" rows="7" required>{{ form.instance.description|default:'' }}</textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Save Shop Information</button>
+   
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

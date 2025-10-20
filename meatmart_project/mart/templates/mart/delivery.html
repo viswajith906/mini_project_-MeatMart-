@@ -1,0 +1,71 @@
+{% extends 'mart/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Your Deliveries & Orders</h2>
+
+  {% if order_items %}
+    {% for item in order_items %}
+      {% with order=item.order feedback=item.feedback form=item.feedback_form %}
+      <div class="card mb-3">
+        <div class="row g-0 align-items-center">
+          <div class="col-auto p-3">
+            {% if order.shop.product_image %}
+              <img src="{{ order.shop.product_image.url }}" alt="{{ order.shop.product_name }}" style="width:120px; height:80px; object-fit:cover; border-radius:6px;">
+            {% else %}
+              <div style="width:120px; height:80px; background:#eee; display:flex; align-items:center; justify-content:center; border-radius:6px;">
+                No Image
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col px-3">
+            <h5 class="mb-1">{{ order.shop.product_name }}</h5>
+            <p class="mb-1">Qty: <strong>{{ order.quantity }} Kg</strong> • Total: <strong>₹{{ order.total_price }}</strong></p>
+            <p class="mb-1 text-muted">Ordered at {{ order.created_at }}</p>
+            <!-- status / actions -->
+            {% if order.status == 'placed' %}
+              <form method="post" action="{% url 'deliver_order' order.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Mark as Delivered</button>
+              </form>
+            {% elif order.status == 'delivered' %}
+              <span class="badge bg-success">Delivered</span>
+
+              {% if feedback %}
+                <div class="mt-2">
+                  <strong>Review/Suggestion:</strong>
+                  <div>Rating: {{ feedback.rating }} / 5</div>
+                  <div>{{ feedback.comment|linebreaks }}</div>
+                </div>
+              {% elif form %}
+                <div class="mt-3" style="max-width:480px;">
+                  <form method="post" action="{% url 'submit_feedback' order.id %}">
+                    {% csrf_token %}
+                    {{ form.rating.label_tag }} 
+                    {{ form.rating }}
+                    <div class="mt-2">
+                      {{ form.comment.label_tag }}
+                      {{ form.comment }}
+                    </div>
+                    <div class="mt-2">
+                      <button type="submit" class="btn btn-primary btn-sm">Submit Feedback</button>
+                    </div>
+                  </form>
+                </div>
+              {% else %}
+                <div class="text-muted mt-2">No feedback needed / already submitted.</div>
+              {% endif %}
+            {% else %}
+              <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+    {% endfor %}
+  {% else %}
+    <p>No orders found.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'mart/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Register</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <!-- Password field with toggle button -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Confirm Password field with toggle button -->
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="customer">Customer</option>
+                            <option value="shop">Shop Owner</option>
+                        </select>
+                    </div>
+
+                    <!-- Phone field - hidden by default -->
+                    <div class="mb-3 d-none" id="phoneField">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="tel" pattern="[0-9]{10,15}" class="form-control" id="phone_number" name="phone_number" placeholder="e.g. 9876543210">
+                    <div class="form-text">Required for customers.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Already have an account? 
+                        <a href="{% url 'customer_login' %}">Login as Customer</a> or 
+                        <a href="{% url 'shop_login' %}">Login as Shop</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to toggle password visibility
+    function setupPasswordToggle(passwordFieldId, toggleButtonId) {
+        const passwordField = document.getElementById(passwordFieldId);
+        const toggleButton = document.getElementById(toggleButtonId);
+        
+        toggleButton.addEventListener('click', function() {
+            // Toggle the password field type
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            const icon = this.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+    }
+    
+    // Set up toggles for both password fields
+    document.addEventListener('DOMContentLoaded', function() {
+        setupPasswordToggle('password', 'togglePassword');
+        setupPasswordToggle('confirm_password', 'toggleConfirmPassword');
+        const roleSelect = document.getElementById('role');
+        const phoneDiv = document.getElementById('phoneField');
+        const phoneInput = document.getElementById('phone_number');
+
+         function togglePhoneField() {
+        if (!roleSelect) return;
+        if (roleSelect.value === 'customer') {
+            phoneDiv.classList.remove('d-none');
+            phoneInput.required = true;
+        } else {
+            phoneDiv.classList.add('d-none');
+            phoneInput.required = false;
+            phoneInput.value = '';
+        }
+    }
+
+    roleSelect.addEventListener('change', togglePhoneField);
+    // also call once on load (to support back / refresh with pre-selected value)
+    togglePhoneField();
+
+    });
+</script>
+
+<style>
+    /* Custom styling for the toggle buttons */
+    #togglePassword, #toggleConfirmPassword {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+        background: linear-gradient(rgba(194, 194, 194, 0.71), rgba(89, 82, 82, 0.69));
+    }
+    
+    /* Ensure the input group looks cohesive */
+    .input-group .form-control:not(:first-child) {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        
+    }
+</style>
+{% endblock %}

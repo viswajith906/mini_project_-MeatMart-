@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeatMart - Find Nearby Shops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #8B0000;
+            --secondary-color: #f8f9fc;
+            --accent-color: #36b9cc;
+            --text-color: #5a5c69;
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-color);
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #6a0d0d 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .search-form {
+            max-width: 400px;
+        }
+        
+        .search-input {
+            border-radius: 20px 0 0 20px;
+            border: none;
+            padding-left: 20px;
+        }
+        
+        .search-btn {
+            border-radius: 0 20px 20px 0;
+            background: var(--secondary-color);
+            border: none;
+            color: var(--primary-color);
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 600;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .order-btn {
+            background: #070706ff;
+            color: var(--primary-color);
+            border-radius: 20px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        
+        .order-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .shop-card {
+            border-radius: px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            margin-bottom: 20px;
+            background: white;
+        }
+        
+        .shop-card:hover {
+            transform: translateY(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .shop-image {
+            height: 100px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .shop-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .rating {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        
+        .distance {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .section-title {
+            position: relative;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--primary-color);
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+        
+        
+        
+        .footer {
+            background: black;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-top: 1px solid #ffffffff;
+            text: white;
+        }
+        
+        .location-search {
+            position: relative;
+        }
+        
+        .location-search .search-input {
+            padding-left: 40px;
+        }
+        
+        .location-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 5;
+        }
+        
+        .map-container {
+            border-radius: 15px;
+            overflow: hidden;
+            height: 400px;
+            background: #8e9ea3ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .delivery-btn {
+            background: #070706ff;
+            color: var(--primary-color);
+            border-radius: 20px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        .delivery-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+  #location-notify {
+    position: fixed;
+    top: 20px;                 /* adjust to sit under your navbar */
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 10px 16px;
+    border-radius: 6px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    background: #0d6efd;       /* blue (change if you want) */
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    z-index: 1100;
+    opacity: 0;
+    transition: opacity 220ms ease, transform 220ms ease;
+    min-width: 180px;
+  }
+
+  #location-notify.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    display: block;
+  }
+
+  #location-notify.success { background: #198754; } /* green */
+  #location-notify.error   { background: #dc3545; } /* red */
+</style>
+
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-store me-2"></i>MEATMART
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Search Bar -->
+                <!-- Search Bar: replace existing form -->
+<form class="d-flex search-form me-auto location-search" method="get" action="{% url 'customer_dashboard' %}">
+    <i class="fas fa-map-marker-alt location-icon"></i>
+    <input class="form-control search-input"
+           type="search"
+           name="location"
+           placeholder="Search near shops..."
+           value="{{ request.GET.location|default:'' }}"
+           aria-label="Search">
+    <button class="btn search-btn" type="submit">
+        <i class="fas fa-search"></i>
+    </button>
+</form>
+
+                
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link delivery-btn" href="{% url 'delivery' %}"><i class="fas fa-truck me-1"></i> Delivery</a>
+                    </li>
+
+                    
+                    <li class="nav-item ms-2">
+                        <a class="nav-link order-btn" href="{% url 'orders' %}"><i class="fas fa-bag-shopping me-1"></i> Orders</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+
+    <div class="map-card card p-3 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    {% if request.GET.location %}
+  <h3 class="section-title">Shops matching “{{ request.GET.location }}”</h3>
+{% else %}
+  <h3 class="section-title">Popular Shops Near You</h3>
+{% endif %}
+
+  <!-- Enable button -->
+<button id="enable-location-btn" class="btn btn-primary">Enable Location</button>
+  </div>
+<!-- Notification container (hidden by default) -->
+<div id="location-notify" role="status" aria-live="polite" aria-atomic="true" style="display:none;">
+  <span id="location-notify-text"></span>
+</div>
+
+  <div id="customer-map" style="height:420px;border-radius:8px;"></div>
+</div>
+
+        
+       
+        
+        <!-- Shops Grid -->
+<div class="row">
+    {% for shop in shops %}
+    <div class="col-md-6 col-12">
+        <div class="shop-card">
+            <div class="position-relative">
+                {% if shop.shop_image %}
+                <img src="{{ shop.shop_image.url }}" class="shop-image" alt="{{ shop.name }}">
+                {% else %}
+                <img src="https://via.placeholder.com/400x200?text=No+Image" class="shop-image" alt="{{ shop.name }}">
+                {% endif %}
+                <span class="shop-badge">OPENED</span>
+            </div>
+            <div class="card-body">
+                <h2 class="card-title">{{ shop.name }}</h2>
+                <p class="card-text">{{ shop.description|default:"No description available" }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="rating"><i class="fas fa-star"></i> 4.5</span>
+                        <span class="ms-3 distance"><i class="fas fa-map-marker-alt"></i> {{ shop.address }}</span>
+                    </div>
+                    <a href="{% url 'shop_detail' shop.id %}" class="btn btn-sm btn-outline-primary">View & Order</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center">No shops available yet.</p>
+    {% endfor %}
+</div>
+
+        
+        <!-- Load More Button -->
+        <div class="text-center mt-4">
+            <button class="btn btn-primary"><i class="fas fa-redo me-2"></i>Load More Shops</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer text-center">
+        <p class="mb-0">© 2023 MeatMart. All rights reserved.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+(function () {
+  const btn = document.getElementById('enable-location-btn');
+  const notify = document.getElementById('location-notify');
+  const notifyText = document.getElementById('location-notify-text');
+
+  if (!btn || !notify || !notifyText) return;
+
+  function showNotification(message, variant = 'success', duration = 2000) {
+    notifyText.textContent = message;
+    notify.classList.remove('success', 'error');
+    notify.classList.add(variant, 'show');
+    // clear timer if any
+    if (notify._timer) clearTimeout(notify._timer);
+    notify._timer = setTimeout(() => {
+      notify.classList.remove('show');
+      // allow transition to finish
+      setTimeout(() => { notify.style.display = 'none'; }, 260);
+    }, duration);
+    // ensure visible
+    notify.style.display = 'block';
+  }
+
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+
+    if (!navigator.geolocation) {
+      showNotification('Geolocation not supported', 'error', 2000);
+      btn.disabled = false;
+      return;
+    }
+
+    const opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+
+    // ask for location, but DO NOT send/save it anywhere
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      // success — show demo message only
+      showNotification('Location enabled', 'success', 2000);
+      btn.disabled = false;
+      // NOTE: we intentionally DO NOT send pos.coords to server or store it
+    }, function (err) {
+      // show a short friendly error
+      const msg = (err && err.code === err.PERMISSION_DENIED) ? 'Location permission denied' : 'Could not get location';
+      showNotification(msg, 'error', 2000);
+      btn.disabled = false;
+    }, opts);
+  });
+})();
+</script>
+
+
+</body>
+</html>
