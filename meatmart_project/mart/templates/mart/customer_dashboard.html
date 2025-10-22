@@ -165,16 +165,10 @@
             z-index: 5;
         }
         
-        .map-container {
-            border-radius: 15px;
-            overflow: hidden;
-            height: 400px;
-            background: #8e9ea3ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        #customer-map{
+            background:  url('https://cdn.prod.website-files.com/609ed46055e27a02ffc0749b/668ed888a01face67cd03181_64656c3016b62c55db38c533_store-locator-p-800%2520(1).jpeg');
+            text-align: center;
+            color: #ff0000ff;;
         }
         .delivery-btn {
             background: #070706ff;
@@ -217,6 +211,11 @@
   #location-notify.success { background: #198754; } /* green */
   #location-notify.error   { background: #dc3545; } /* red */
 </style>
+
+
+
+
+
 
 </head>
 <body>
@@ -279,7 +278,26 @@
   <span id="location-notify-text"></span>
 </div>
 
-  <div id="customer-map" style="height:420px;border-radius:8px;"></div>
+  <div id="customer-map" style="height:420px;border-radius:8px;">
+       
+
+
+
+
+
+<iframe 
+          src="{% url 'map_view' %}" 
+          width="100%" 
+          height="500" 
+          style="border:none; border-radius:10px;"
+          allowfullscreen>
+      </iframe>
+
+
+
+
+
+  </div>
 </div>
 
         

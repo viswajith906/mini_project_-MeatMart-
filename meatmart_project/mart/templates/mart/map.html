@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    #instructions {
+        margin-top: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .buttonss {
+        padding: 10px 20px;
+        background-color: rgb(26, 34, 38);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .icons {
+        margin: -60px 0px 0px 805px;
+    }
+    .submit{
+        background-color: rgba(101, 119, 155, 1);
+    }
+</style>
+</head>
+<body>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Show Route</button>
+</form>
+
+<div id="map"></div>
+<div id="instructions"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+
+{% if start|default:None and end|default:None %}
+<script>
+    const map = L.map('map').setView([48.8566, 2.3522], 13); // Default: Paris
+
+    // Clean map style like Google Maps
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors & CartoDB'
+    }).addTo(map);
+
+    // Geocode addresses to coordinates
+    async function geocode(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.length > 0) {
+            return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        } else {
+            alert("Location not found: " + query);
+            return null;
+        }
+    }
+
+    // Add ORS custom router
+    L.Routing.openrouteservice = function (apiKey) {
+        return new L.Routing.OpenRouteService(apiKey);
+    };
+
+    L.Routing.OpenRouteService = L.Class.extend({
+        initialize: function (apiKey) {
+            this._apiKey = apiKey;
+        },
+        route: function (waypoints, callback, context, options) {
+            const coords = waypoints.map(wp => [wp.latLng.lng, wp.latLng.lat]);
+            fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+                method: 'POST',
+                headers: {
+                    'Authorization': this._apiKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ coordinates: coords })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const routeCoords = data.features[0].geometry.coordinates.map(c => L.latLng(c[1], c[0]));
+
+                    const instructions = data.features[0].properties.segments[0].steps;
+                    let html = '<h3>Directions:</h3><ol>';
+                    instructions.forEach(step => {
+                        html += `<li>${step.instruction}</li>`;
+                    });
+                    html += '</ol>';
+                    document.getElementById('instructions').innerHTML = html;
+
+                    callback.call(context, null, [{
+                        name: 'Route',
+                        coordinates: routeCoords,
+                        instructions: instructions
+                    }]);
+                })
+                .catch(err => callback.call(context, err));
+        }
+    });
+
+    async function plotRoute() {
+        const start = await geocode("{{ start }}");
+        const end = await geocode("{{ end }}");
+
+        if (start && end) {
+            map.setView(start, 13);
+
+            // Add markers
+            L.marker(start).addTo(map).bindPopup("Start").openPopup();
+            L.marker(end).addTo(map).bindPopup("End");
+
+            // Draw route using default OSRM routing engine
+            L.Routing.control({
+                waypoints: [
+                    L.latLng(start[0], start[1]),
+                    L.latLng(end[0], end[1])
+                ],
+                routeWhileDragging: false,
+                draggableWaypoints: false,
+                addWaypoints: false,
+                geocoder: L.Control.Geocoder.nominatim(),
+                showAlternatives: false,
+                fitSelectedRoutes: true
+            }).addTo(map);
+        }
+    }
+
+
+    plotRoute();
+</script>
+{% endif %}
+</body>
+</html>

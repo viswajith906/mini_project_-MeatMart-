@@ -26,7 +26,8 @@ urlpatterns = [
     path('shop/order/<int:order_id>/mark-delivered/', views.shop_mark_delivered, name='shop_mark_delivered'),
     path('api/shop_unread_orders/', views.api_shop_unread_orders, name='api_shop_unread_orders'),
     path('api/mark_orders_seen/', views.mark_orders_seen, name='api_mark_orders_seen'),
-
+    path('customer/map_view/',views.map_view,name='map_view'),
+    
 
 
 

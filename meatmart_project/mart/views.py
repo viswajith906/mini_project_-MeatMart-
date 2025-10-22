@@ -85,6 +85,8 @@ def shop_login(request):
     return render(request, 'mart/shop_login.html', {'form': form})
 
 def customer_dashboard(request):
+
+    
     if 'user_id' not in request.session or request.session.get('user_role') != 'customer':
         messages.error(request, 'Please login as customer first')
         return redirect('customer_login')
@@ -508,3 +510,31 @@ def mark_orders_seen(request):
     return JsonResponse({'status': 'ok'})
 
 
+
+
+
+from django import forms
+from django.shortcuts import render
+from django.views.decorators.clickjacking import xframe_options_exempt
+# Define the form inline here
+class RouteForm(forms.Form):
+    start = forms.CharField(label="Start Location", max_length=100)
+    end = forms.CharField(label="End Location", max_length=100)
+@xframe_options_exempt
+def map_view(request):
+    role = request.session.get('role')
+    start = end = None
+    form = RouteForm()
+
+    if request.method == 'POST':
+        form = RouteForm(request.POST)
+        if form.is_valid():
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
+
+    return render(request, 'mart/map.html', {
+        'form': form,
+        'start': start,
+        'end': end,
+        "role":role
+    })

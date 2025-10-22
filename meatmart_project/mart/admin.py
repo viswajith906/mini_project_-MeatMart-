@@ -10,7 +10,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user', 'location', 'phone_number', 'created_at')
+    list_display = ('name', 'user', 'location', 'phone_number',  'created_at')
     list_filter = ('location', 'created_at')
     search_fields = ('name', 'user__username', 'location')
 

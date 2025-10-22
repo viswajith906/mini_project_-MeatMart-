@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
+
 class User(models.Model):
     ROLE_CHOICES = (
         ('customer', 'Customer'),
@@ -14,6 +15,10 @@ class User(models.Model):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     phone_number = models.CharField(max_length=15, blank=True, null=True)   # << ADD THIS
     created_at = models.DateTimeField(auto_now_add=True)
+     # Add numeric fields for latitude/longitude (nullable to keep backward compatibility)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
     
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -25,7 +30,9 @@ class Shop(models.Model):
     address = models.TextField()
     shop_image = models.ImageField(upload_to='shops/', null=True, blank=True)
     location = models.CharField(max_length=100)
-   
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
     phone_number = models.CharField(max_length=15)
     payment_phone_number = models.CharField(
     "Online Payment Phone",
