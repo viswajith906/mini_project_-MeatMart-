@@ -27,7 +27,9 @@ urlpatterns = [
     path('api/shop_unread_orders/', views.api_shop_unread_orders, name='api_shop_unread_orders'),
     path('api/mark_orders_seen/', views.mark_orders_seen, name='api_mark_orders_seen'),
     path('customer/map_view/',views.map_view,name='map_view'),
-    
+    # New: shop full map page for shop owners
+    path('shop/map/', views.shop_map, name='shop_map'),
+
 
 
 

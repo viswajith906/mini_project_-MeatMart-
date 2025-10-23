@@ -19,6 +19,7 @@
             <div class="text-muted small">
               Customer: {{ order.customer.username }} |
               Phone: {{ order.customer.phone_number|default:order.customer.email|default:"N/A" }}
+              Location: {{ order.customer.location|default:"Not provided" }}
             </div>
             <div class="text-muted small">Ordered: {{ order.created_at }}</div>
           </div>

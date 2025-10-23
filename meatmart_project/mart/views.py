@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.hashers import make_password, check_password
-from .models import User, Shop, Order, Feedback
+from .models import User, Shop, Order, Feedback, Delivery
 from .forms import UserRegistrationForm, ShopRegistrationForm, LoginForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -30,6 +30,7 @@ def register(request):
             user = form.save(commit=False)
             user.password = make_password(form.cleaned_data['password'])
             user.phone_number = form.cleaned_data.get('phone_number', '') or ''
+            user.location = form.cleaned_data.get('location', '') or ''
             user.save()
             messages.success(request, 'Registration successful! Please login.')
             return redirect('home')
@@ -225,6 +226,12 @@ def place_order(request, shop_id):
                 quantity=quantity,
                 total_price=total_price,
                 status='placed',
+            )
+            delivery_address = customer.location or customer.phone_number or ''
+            Delivery.objects.create(
+                order=order,
+                delivery_address=delivery_address,
+                delivery_status='pending'
             )
 
         messages.success(request, f'Order placed successfully! Total = ₹{total_price}')
@@ -537,4 +544,27 @@ def map_view(request):
         'start': start,
         'end': end,
         "role":role
+    })
+
+def shop_map(request):
+    # Ensure user is a shop
+    if 'user_id' not in request.session or request.session.get('user_role') != 'shop':
+        messages.error(request, 'Please login as shop first')
+        return redirect('shop_login')
+
+    role = 'shop'
+    start = end = None
+    form = RouteForm()
+
+    if request.method == 'POST':
+        form = RouteForm(request.POST)
+        if form.is_valid():
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
+
+    return render(request, 'mart/map.html', {
+        'form': form,
+        'start': start,
+        'end': end,
+        'role': role
     })

@@ -13,12 +13,12 @@ class User(models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)   # << ADD THIS
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
      # Add numeric fields for latitude/longitude (nullable to keep backward compatibility)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-
+    location = models.TextField(blank=True, null=True, help_text="Customer's address/area")
     
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -86,7 +86,7 @@ class Feedback(models.Model):
         return f"Feedback for Order {self.order.id} - {self.rating}★"
 
 class Delivery(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='deliveries')
     delivery_address = models.TextField()
     delivery_status = models.CharField(
         max_length=20,

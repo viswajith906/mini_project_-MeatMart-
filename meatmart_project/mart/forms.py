@@ -9,9 +9,10 @@ class UserRegistrationForm(forms.ModelForm):
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'phone_number', 'password', 'role']
+        fields = ['username', 'email', 'phone_number', 'location', 'password', 'role']
         widgets = {
             'role': forms.Select(attrs={'class': 'form-control'}),
+            'location': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Your area / address'}),
         }
     
     def clean(self):
@@ -54,3 +55,4 @@ class FeedbackForm(forms.ModelForm):
             'rating': forms.Select(attrs={'class':'form-select'}, choices=[(i,i) for i in range(1,6)]),
             'comment': forms.Textarea(attrs={'class':'form-control', 'rows':3, 'placeholder':'Write your feedback...'}),
         }
+

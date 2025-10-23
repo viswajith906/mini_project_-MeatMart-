@@ -20,6 +20,12 @@
         font-family: Arial, sans-serif;
     }
 
+    #routeSummary {
+        margin-top: 12px;
+        font-family: Arial, sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+    }
     .buttonss {
         padding: 10px 20px;
         background-color: rgb(26, 34, 38);
@@ -46,6 +52,7 @@
 </form>
 
 <div id="map"></div>
+<div id="routeSummary"></div>
 <div id="instructions"></div>
 
 <!-- Leaflet JS -->
@@ -115,7 +122,8 @@
                 .catch(err => callback.call(context, err));
         }
     });
-
+    function formatKm(meters) { return (meters / 1000).toFixed(2) + " km"; }
+    function formatMinutes(seconds) { return Math.round(seconds / 60) + " min"; }
     async function plotRoute() {
         const start = await geocode("{{ start }}");
         const end = await geocode("{{ end }}");
@@ -140,6 +148,13 @@
                 showAlternatives: false,
                 fitSelectedRoutes: true
             }).addTo(map);
+            routingControl.on('routesfound', function (e) {
+                let summary = e.routes[0].summary;
+                let distance = formatKm(summary.totalDistance);
+                let eta = formatMinutes(summary.totalTime);
+                document.getElementById('routeSummary').innerText =
+                    "Distance: " + distance + " — ETA: " + eta;
+            });
         }
     }
 

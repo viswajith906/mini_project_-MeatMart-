@@ -56,6 +56,13 @@
                     <input type="tel" pattern="[0-9]{10,15}" class="form-control" id="phone_number" name="phone_number" placeholder="e.g. 9876543210">
                     <div class="form-text">Required for customers.</div>
                     </div>
+                    <!-- Location field - hidden by default -->
+<div class="mb-3 d-none" id="locationField">
+  <label for="location" class="form-label">Location / Area</label>
+  <textarea class="form-control" id="location" name="location" rows="2" placeholder="e.g. Anna Nagar, Chennai"></textarea>
+  <div class="form-text">Optional but recommended for accurate delivery.</div>
+</div>
+
                     <button type="submit" class="btn btn-primary w-100">Register</button>
                 </form>
                 <div class="text-center mt-3">
@@ -93,30 +100,32 @@
     }
     
     // Set up toggles for both password fields
-    document.addEventListener('DOMContentLoaded', function() {
-        setupPasswordToggle('password', 'togglePassword');
-        setupPasswordToggle('confirm_password', 'toggleConfirmPassword');
-        const roleSelect = document.getElementById('role');
-        const phoneDiv = document.getElementById('phoneField');
-        const phoneInput = document.getElementById('phone_number');
+ document.addEventListener('DOMContentLoaded', function() {
+  const roleSelect = document.getElementById('role');
+  const phoneField = document.getElementById('phoneField');
+  const locationField = document.getElementById('locationField');
 
-         function togglePhoneField() {
-        if (!roleSelect) return;
-        if (roleSelect.value === 'customer') {
-            phoneDiv.classList.remove('d-none');
-            phoneInput.required = true;
-        } else {
-            phoneDiv.classList.add('d-none');
-            phoneInput.required = false;
-            phoneInput.value = '';
-        }
+  function toggleFields() {
+    const role = roleSelect.value;
+    if (role === 'customer') {
+      phoneField.classList.remove('d-none');
+      locationField.classList.remove('d-none');
+    } else {
+      phoneField.classList.add('d-none');
+      locationField.classList.add('d-none');
+      // optional: clear values when switching away
+      // document.getElementById('phone_number').value = '';
+      // document.getElementById('location').value = '';
     }
+  }
 
-    roleSelect.addEventListener('change', togglePhoneField);
-    // also call once on load (to support back / refresh with pre-selected value)
-    togglePhoneField();
+  // initial run (in case user selects role via back button)
+  toggleFields();
 
-    });
+  roleSelect.addEventListener('change', toggleFields);
+});
+
+    
 </script>
 
 <style>
